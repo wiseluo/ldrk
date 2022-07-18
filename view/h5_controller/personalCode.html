@@ -1,0 +1,187 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0" />
+
+
+    <style>
+        .wrap {
+            margin: 2rem;
+            font-size: 1rem;
+        }
+        
+        .content {
+            margin-top: 5rem;
+        }
+        
+        .imageBox {
+            width: 8.25rem;
+            height: 8.25rem;
+            margin: 0 auto;
+        }
+        
+        .image {
+            width: 100%;
+            height: 100%;
+            margin: 0 auto;
+        }
+        
+        .ywfy {
+            font-size: 1.5rem;
+            text-align: justify;
+            line-height: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .primary-btn {
+            width: 18.75rem;
+            height: 3.9375rem;
+            border: none;
+            background-color: rgba(0, 170, 255, 1) !important;
+            border-radius: 1rem;
+            border: rgba(0, 170, 255, 1) !important;
+            color: #ffff;
+            text-align: center;
+            font-size: 2rem;
+        }
+        
+        .primary-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0.1875rem 0.0125rem 1.375rem 1px rgba(0, 0, 0, 0.24);
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="content">
+            <div class="imageBox">
+                <img src="./icon.jpg" class="image" alt="" srcset="" />
+            </div>
+
+            <div id="help_txt" class="ywfy">
+                请点击下方“扫场所码”按钮，并扫场所码完成代扫步骤！
+            </div>
+
+            <div id="error_txt" class="ywfy">
+                
+            </div>
+
+            <!-- <div style="display: flex; justify-content: center">
+                <button class="primary-btn" onclick="scanCode()">扫场所码</button>
+            </div> -->
+            <div class="ywfy"></div>
+            <wx-open-launch-weapp
+                style="display: block;width: 100%;height: 100%;"
+                id="launch-btn"
+                username="gh_ed3d898abfaa"
+                path="pages/home/scanPesonalCode?uniqid={$uniqid}"
+            >
+                <script type="text/wxtag-template">
+                <style>.btn { padding: 12px }
+
+                    .primary-btn {
+                        text-align: center;
+                        width: 100%;
+                        height: 3.9375rem;
+                        border: none;
+                        background-color: rgba(0, 170, 255, 1) !important;
+                        border-radius: 1rem;
+                        border: rgba(0, 170, 255, 1) !important;
+                        color: #ffff;
+                        text-align: center;
+                        font-size: 2rem;
+                    }
+
+                </style>
+                <button class="primary-btn">扫场所码</button>
+                </script>
+            </div>
+
+          </wx-open-launch-weapp>
+
+        </div>
+    </div>
+
+
+
+
+</body>
+
+</html>
+<script src="https://res2.wx.qq.com/open/js/jweixin-1.6.0.js"></script>
+<script type="text/javascript">
+
+    document.addEventListener('WeixinOpenTagsError', function (e) {
+    console.error(e.detail.errMsg); // 无法使用开放标签的错误原因，需回退兼容。仅无法使用开放标签，JS-SDK其他功能不受影响
+    });
+
+
+    wx.config({
+            debug: false, // 调试时可开启
+            appId: '{$wxconfig.appId}', // <!-- replace -->
+            timestamp: '{$wxconfig.timestamp}', // 必填，填任意数字即可
+            nonceStr: '{$wxconfig.nonceStr}', // 必填，填任意非空字符串即可
+            signature: '{$wxconfig.signature}', // 必填，填任意非空字符串即可
+            jsApiList: ['scanQRCode','chooseImage','previewImage'], // 必填，随意一个接口即可 
+            openTagList:['wx-open-launch-weapp'], // 填入打开小程序的开放标签名
+    })
+
+    wx.ready(function () {
+
+
+        var btn = document.getElementById('launch-btn');
+        btn.addEventListener('launch', function (e) {
+            console.log('success');
+        });
+        btn.addEventListener('error', function (e) {
+            console.log('fail', e.detail);
+        });
+
+        wx.error(function(res){
+            // config信息验证失败会执行error函数，如签名过期导致验证失败，具体错误信息可以打开config的debug模式查看，也可以在返回的res参数中查看，对于SPA可以在这里更新签名。
+            alert("验证失败，请重试！");
+        });
+
+    });
+
+
+    function scanCode(){
+        wx.scanQRCode({
+            success (res) {
+                console.log(res)
+            }
+        })
+    }
+
+    function docReady(fn) {
+        if (document.readyState === 'complete' || document.readyState === 'interactive') {
+          fn()
+        } else {
+          document.addEventListener('DOMContentLoaded', fn);
+        }
+    }
+
+    docReady(async function() {
+        var ua = navigator.userAgent.toLowerCase()
+        var isWXWork = ua.match(/wxwork/i) == 'wxwork'
+        var isWeixin = !isWXWork && ua.match(/micromessenger/i) == 'micromessenger'
+        var isMobile = false
+        var isDesktop = false
+        if (navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|IEMobile)/i)) {
+          isMobile = true
+        } else {
+          isDesktop = true
+        }
+
+        if (isWeixin) {
+            // 
+        }else{
+            document.getElementById('help_txt').innerHTML = '请使用微信扫一扫功能'
+            alert('请使用微信扫一扫功能');
+        }
+    })
+
+
+</script>

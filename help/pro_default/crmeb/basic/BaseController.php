@@ -1,0 +1,1 @@
+<?phpnamespace crmeb\basic;abstract class BaseController{}

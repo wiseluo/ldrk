@@ -1,0 +1,26 @@
+<?php
+declare (strict_types = 1);
+
+namespace {%namespace%};
+
+use app\dao\BaseDao;
+use app\model\***\{%className%};
+
+/**
+ *
+ * Class {%className%}Dao
+ * @package {%namespace%}
+ */
+class {%className%}Dao extends BaseDao
+{
+
+    /**
+     * 设置模型
+     * @return string
+     */
+    protected function setModel(): string
+    {
+        return {%className%}::class;
+    }
+
+}

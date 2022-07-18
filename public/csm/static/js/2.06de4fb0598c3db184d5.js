@@ -1,0 +1,2 @@
+webpackJsonp([2],{Kq85:function(e,t,n){"use strict";Object.defineProperty(t,"__esModule",{value:!0});var r={render:function(){var e=this.$createElement,t=this._self._c||e;return t("div",{staticClass:"error"},[t("van-empty",{attrs:{image:"network",description:"暂未获取到数据"}})],1)},staticRenderFns:[]};var a=n("VU/8")(null,r,!1,function(e){n("kwQO"),n("rLdW")},"data-v-18bb8add",null);t.default=a.exports},kwQO:function(e,t){},rLdW:function(e,t){}});
+//# sourceMappingURL=2.06de4fb0598c3db184d5.js.map

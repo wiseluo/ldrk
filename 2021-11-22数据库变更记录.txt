@@ -1,0 +1,112 @@
+
+�û���eb_user��
+declare_type ֵ��'leave','return'��Ϊ'leave','come','riskarea'��ԭreturn��ֵ����Ϊcome
+�����ֶΣ�vaccination��vaccination_date��vaccination_times��card_type��jkm_time��jkm_mzt��hsjc_time��hsjc_result
+
+�걨��eb_declare��
+�����ֶΣ�id_verify_result��age��process_result��ocr_result��travel_route��travel_time��control_state��jkm_time��jkm_mzt��vaccination��vaccination_date��vaccination_times��hsjc_time��hsjc_result��is_back��is_warning
+
+
+ALTER TABLE `eb_declare`
+ADD COLUMN `control_state`  varchar(200) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '�ܿ�״̬' AFTER `age`
+ADD COLUMN `jkm_time`  datetime NULL DEFAULT NULL COMMENT '�������ȡʱ��' AFTER `control_state`,
+ADD COLUMN `jkm_mzt`  varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '������-��״̬' AFTER `jkm_time`,
+ADD COLUMN `vaccination`  tinyint(4) NULL DEFAULT 0 COMMENT '������֣�0=��1=��' AFTER `jkm_mzt`,
+ADD COLUMN `vaccination_date`  date NULL DEFAULT NULL COMMENT '��������' AFTER `vaccination`,
+ADD COLUMN `vaccination_times`  tinyint(4) NULL DEFAULT 0 COMMENT '���ּ���' AFTER `vaccination_date`,
+ADD COLUMN `hsjc_time`  datetime NULL DEFAULT NULL COMMENT '������ʱ��' AFTER `vaccination_times`,
+ADD COLUMN `hsjc_result`  varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '��������' AFTER `hsjc_time`,
+ADD COLUMN `is_back`  tinyint(4) UNSIGNED NULL DEFAULT 0 COMMENT '�Ƿ��ѷ��壨����ʱ����ʱ�����ֶ���Ч��' AFTER `hsjc_result`,
+ADD COLUMN `is_warning`  tinyint(4) UNSIGNED NULL DEFAULT 0 COMMENT '�Ƿ���ҪԤ�����и߷��չ�����Ϊ1�����������ϵͳ����Ҳ������Ϊ1��' AFTER `is_back`
+
+ALTER TABLE `eb_user`
+ADD COLUMN `vaccination`  tinyint(4) NULL DEFAULT 0 COMMENT '������֣�0=��1=��' AFTER `delete_time`,
+ADD COLUMN `vaccination_date`  date NULL DEFAULT NULL COMMENT '��������' AFTER `vaccination`,
+ADD COLUMN `vaccination_times`  tinyint(4) NULL DEFAULT 0 COMMENT '���ּ���' AFTER `vaccination_date`,
+ADD COLUMN `card_type`  enum('id','passport','officer','other') CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT 'other' COMMENT '֤�����ͣ�id=����֤�ţ�passport=���պţ�officer=����֤��' AFTER `vaccination_times`,
+ADD COLUMN `jkm_time`  datetime NULL DEFAULT NULL COMMENT '�������ȡʱ��' AFTER `card_type`,
+ADD COLUMN `jkm_mzt`  varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '������-��״̬' AFTER `jkm_time`,
+ADD COLUMN `hsjc_time`  datetime NULL DEFAULT NULL COMMENT '������ʱ��' AFTER `jkm_mzt`,
+ADD COLUMN `hsjc_result`  varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT '' COMMENT '��������' AFTER `hsjc_time`
+
+ALTER TABLE `eb_user`
+MODIFY COLUMN `declare_type`  enum('leave','return','come','riskarea') CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '�걨���ͣ�leave=����걨��come=�������걨��riskarea=�и߷��յ��������걨' AFTER `position_type`
+
+update eb_user set declare_type='come' where declare_type='return' 
+
+INSERT INTO `eb_system_config` (`id`, `menu_name`, `type`, `input_type`, `config_tab_id`, `parameter`, `upload_type`, `required`, `width`, `high`, `value`, `info`, `desc`, `sort`, `status`) VALUES ('362', 'zzsb_view_lastid', 'text', 'input', '0', '', NULL, '', '100', NULL, '0', '�����걨��ͼ������id', '�����걨��ͼ������id', '0', '0')
+
+ALTER TABLE `eb_user`
+ADD COLUMN `permanent_address`  varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT '������ַ' AFTER `hsjc_result`
+
+
+##11.26
+CREATE TABLE `eb_declare_date_nums` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `date` date DEFAULT NULL,
+  `province` varchar(50) DEFAULT NULL COMMENT '省份',
+  `leave_nums` int(11) unsigned DEFAULT '0',
+  `come_nums` int(11) unsigned DEFAULT '0',
+  `riskarea_nums` int(11) unsigned DEFAULT '0',
+  `total_nums` int(11) unsigned DEFAULT '0',
+  `create_time` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=846 DEFAULT CHARSET=utf8;
+
+视图1
+SELECT
+	date_format( from_unixtime( `eb_declare`.`create_time` ), '%Y-%m-%d' ) AS `date`,
+	`eb_declare`.`province` AS `province`,
+	sum( IF ( ( `eb_declare`.`declare_type` = 'leave' ), 1, 0 ) ) AS `leave_nums`,
+	sum( IF ( ( `eb_declare`.`declare_type` = 'come' ), 1, 0 ) ) AS `come_nums`,
+	sum( IF ( ( `eb_declare`.`declare_type` = 'riskarea' ), 1, 0 ) ) AS `riskarea_nums`,
+	count( `eb_declare`.`id` ) AS `total_nums` 
+FROM
+	`eb_declare` 
+WHERE
+	( date_format( from_unixtime( `eb_declare`.`create_time` ), '%Y-%m-%d' ) = date_format( now( ), '%Y-%m-%d' ) ) 
+GROUP BY
+	`date`,
+	`eb_declare`.`province`
+
+视图2
+SELECT
+	`today_nums`.`date` AS `date`,
+	`today_nums`.`province` AS `province`,
+	`today_nums`.`leave_nums` AS `leave_nums`,
+	`today_nums`.`come_nums` AS `come_nums`,
+	`today_nums`.`riskarea_nums` AS `riskarea_nums`,
+	`today_nums`.`total_nums` AS `total_nums` 
+FROM
+	`today_nums` UNION ALL
+SELECT
+	`eb_declare_date_nums`.`date` AS `date`,
+	`eb_declare_date_nums`.`province` AS `province`,
+	`eb_declare_date_nums`.`leave_nums` AS `leave_nums`,
+	`eb_declare_date_nums`.`come_nums` AS `come_nums`,
+	`eb_declare_date_nums`.`riskarea_nums` AS `riskarea_nums`,
+	`eb_declare_date_nums`.`total_nums` AS `total_nums` 
+FROM
+	`eb_declare_date_nums`
+
+
+
+## 12.12
+
+ALTER TABLE `eb_declare` 
+ADD COLUMN `hsjc_get` tinyint(4) UNSIGNED NULL DEFAULT 0 COMMENT '是否获取过省内核酸检测信息' AFTER `send_sms`
+
+UPDATE `eb_declare` SET `hsjc_get` = 1 WHERE `hsjc_time` is not NULL
+
+CREATE TABLE `eb_user_hsjc_log` (
+  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `card_type` varchar(80) DEFAULT NULL COMMENT '证件号类型',
+  `id_card` varchar(80) DEFAULT NULL COMMENT '证件号',
+  `real_name` varchar(100) DEFAULT NULL COMMENT '用户名',
+  `hsjc_time` datetime DEFAULT NULL COMMENT '核酸检测时间',
+  `hsjc_result` varchar(80) DEFAULT NULL COMMENT '核酸检测结果',
+  `hsjc_date` date DEFAULT NULL COMMENT '核酸检测日期',
+  `create_datetime` datetime DEFAULT NULL COMMENT '创建日期',
+  `create_time` int(11) unsigned DEFAULT '0',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8;

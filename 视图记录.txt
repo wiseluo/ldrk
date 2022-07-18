@@ -1,0 +1,30 @@
+SELECT
+	`eb_declare`.`id` AS `from_id`,
+	`eb_declare`.`real_name` AS `name`,
+	`eb_declare`.`id_card` AS `id_card`,
+	`eb_declare`.`phone` AS `phonenum`,
+	concat( `eb_declare`.`province`, '/', `eb_declare`.`city`, '/', `eb_declare`.`county`, '/' ) AS `permanent_address`,
+	REPLACE ( REPLACE ( `eb_declare`.`yw_street`, '镇', '' ), '街道', '' ) AS `town`,
+	`eb_declare`.`address` AS `address`,
+	`eb_declare`.`arrival_time` AS `arrive_yiwu_time`,
+IF
+	( ( ( `eb_declare`.`declare_type` = 'riskarea' ) OR ( `eb_declare`.`declare_type` = 'barrier' ) ), '自主申报', '自主申报' ) AS `command_source`,
+	'2' AS `state`,
+	concat( '来义居住人员', concat( `eb_declare`.`province`, '/', `eb_declare`.`city`, '/', `eb_declare`.`county`, '/' ) ) AS `attribution_place` 
+FROM
+	`eb_declare` 
+WHERE
+	(
+	( `eb_declare`.`declare_type` = 'riskarea' ) 
+	OR ( ( `eb_declare`.`declare_type` = 'barrier' ) AND ( `eb_declare`.`city` = '绍兴市' ) ) 
+	OR (
+	( `eb_declare`.`create_time` >= 1649088001 ) 
+	AND ( `eb_declare`.`declare_type` = 'come' ) 
+	AND ( ( `eb_declare`.`county` = '婺城区' ) OR ( `eb_declare`.`county` = '金东区' ) ) 
+	) 
+	OR (
+	( `eb_declare`.`create_time` >= 1647360000 ) 
+	AND ( `eb_declare`.`declare_type` <> 'leave' ) 
+	AND ( ( `eb_declare`.`province` = '上海' ) OR ( `eb_declare`.`travel_route` LIKE '%上海%' ) ) 
+	) 
+	)

@@ -1,0 +1,6 @@
+/runtime/*
+.env
+#/vendor/*
+/public/install/*
+swoole.pid
+/.idea/*
